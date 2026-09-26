@@ -35,14 +35,14 @@ function AppContent() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
             <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <Register />} />
-            <Route path="/edit-profile" element={<EditProfile />} />
+            <Route path="/edit-profile" element={<PrivateRoute><EditProfile /></PrivateRoute>} />
             <Route path="/favorites" element={<PrivateRoute><FavoriteList /></PrivateRoute>} />
             <Route path="/order-process/:id" element={<PrivateRoute><OrderProcess /></PrivateRoute>} />
             <Route path="/checkout/:id" element={<PrivateRoute><OrderSummary /></PrivateRoute>} />
             <Route path="/orders" element={<PrivateRoute><OrderList /></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
             <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
-            <Route path="/order-details/:orderId" element={<OrderDetails />} />
+            <Route path="/order-details/:orderId" element={<PrivateRoute><OrderDetails /></PrivateRoute>} />
             <Route path="/order-history" element={<PrivateRoute><OrderHistory /></PrivateRoute>} /> 
             <Route path="*" element={<div>Page Not Found</div>} />
           </Routes>

@@ -2,16 +2,6 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:9090/api';
 
-const TOKEN_KEY = 'token';
-const REFRESH_TOKEN_KEY = 'refreshToken';
-
-const getToken = () => localStorage.getItem(TOKEN_KEY);
-const setToken = (token) => localStorage.setItem(TOKEN_KEY, token);
-const removeToken = () => localStorage.removeItem(TOKEN_KEY);
-
-const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY);
-const removeRefreshToken = () => localStorage.removeItem(REFRESH_TOKEN_KEY);
-
 const api = axios.create({
     baseURL: API_BASE_URL,
     withCredentials: true,
@@ -20,31 +10,12 @@ const api = axios.create({
     }
 });
 
-api.interceptors.request.use(
-    config => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers['Authorization'] = `Bearer ${token}`;
-        }
-        return config;
-    },
-    error => Promise.reject(error)
-);
-
 export const refreshToken = async () => {
-    const refreshToken = getRefreshToken();
-    if (!refreshToken) {
-        throw new Error('No refresh token found');
-    }
     try {
-        const response = await axios.post(`${API_BASE_URL}/refresh-token`, { refreshToken });
-        const { token } = response.data;
-        setToken(token);
-        return token;
+        const response = await api.post('/refresh-token');
+        return response.data;
     } catch (error) {
         console.error('Token refresh failed:', error);
-        removeToken();
-        removeRefreshToken();
         throw error;
     }
 };
@@ -56,8 +27,7 @@ api.interceptors.response.use(
         if (error.response && error.response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
-                const newToken = await refreshToken();
-                originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+                await refreshToken();
                 return api(originalRequest);
             } catch (refreshError) {
                 window.location.href = '/login';
@@ -68,7 +38,14 @@ api.interceptors.response.use(
     }
 );
 
-export const isAuthenticated = () => !!getToken();
+export const isAuthenticated = async () => {
+    try {
+        await api.get('/users/profile');
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
 
 export const login = async (email, password) => {
     try {
@@ -228,9 +205,14 @@ export const deleteUserProfile = async () => {
     }
 };
 
-export const logout = () => {
-    removeToken();
-    removeRefreshToken();
+export const logout = async () => {
+    try {
+        const response = await api.post('/auth/logout');
+        return response.data;
+    } catch (error) {
+        console.error('Logout error:', error);
+        throw error;
+    }
 };
 
 export const getCart = async () => {
