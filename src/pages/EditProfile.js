@@ -39,7 +39,8 @@ function EditProfile() {
         e.preventDefault();
         try {
             setLoading(true);
-            await updateUserProfile(profile);
+            const { firstName, lastName, email, phone, country, city } = profile;
+            await updateUserProfile({ firstName, lastName, email, phone, country, city });
             navigate('/profile');
         } catch (error) {
             console.error('Error updating profile:', error);

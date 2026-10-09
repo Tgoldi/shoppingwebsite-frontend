@@ -120,7 +120,7 @@ function UserProfile() {
                         variant="outlined" 
                         color="error" 
                         startIcon={<DeleteForever />}
-                        onClick={handleDeleteProfile}
+                        onClick={() => setOpenDeleteConfirm(true)}
                     >
                         Delete Profile
                     </Button>
@@ -140,7 +140,7 @@ function UserProfile() {
                     <Button onClick={() => setOpenDeleteConfirm(false)} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={confirmDelete} color="error" autoFocus>
+                    <Button onClick={handleDeleteProfile} color="error" autoFocus>
                         Delete
                     </Button>
                 </DialogActions>
