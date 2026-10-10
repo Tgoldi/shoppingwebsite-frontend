@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:9090/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:9090/api';
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 const TOKEN_KEY = 'token';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -240,20 +241,11 @@ export const getCart = async () => {
 
 export const createOrderFromCart = async () => {
     try {
-        console.log('Sending request to create order from cart');
         const response = await api.post('/orders/create-from-cart');
-        console.log('Received response:', response.data);
         return response.data.orderId;
     } catch (error) {
-        console.error('Error creating order from cart:', error);
-        if (error.response) {
-            console.error('Response data:', error.response.data);
-            console.error('Response status:', error.response.status);
-            console.error('Response headers:', error.response.headers);
-        } else if (error.request) {
-            console.error('No response received:', error.request);
-        } else {
-            console.error('Error setting up request:', error.message);
+        if (!IS_PRODUCTION) {
+            console.error('Error creating order from cart:', error.message);
         }
         throw error;
     }
@@ -275,13 +267,13 @@ export const placeOrder = async () => {
 };
 
 export const addToCart = async ({ itemId, quantity }) => {
-    console.log(`Adding to cart: itemId=${itemId}, quantity=${quantity}`);
     try {
         const response = await api.post('/cart', { itemId, quantity });
-        console.log('Response:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Error adding to cart:', error.response ? error.response.data : error.message);
+        if (!IS_PRODUCTION) {
+            console.error('Error adding to cart:', error.message);
+        }
         throw error;
     }
 };

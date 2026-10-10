@@ -42,7 +42,7 @@ function AppContent() {
             <Route path="/orders" element={<PrivateRoute><OrderList /></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
             <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
-            <Route path="/order-details/:orderId" element={<OrderDetails />} />
+            <Route path="/order-details/:orderId" element={<PrivateRoute><OrderDetails /></PrivateRoute>} />
             <Route path="/order-history" element={<PrivateRoute><OrderHistory /></PrivateRoute>} /> 
             <Route path="*" element={<div>Page Not Found</div>} />
           </Routes>
