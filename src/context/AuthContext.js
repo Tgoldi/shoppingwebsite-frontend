@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { login as apiLogin, register as apiRegister, logout as apiLogout, getUserProfile } from '../utils/api';
+import { login as apiLogin, register as apiRegister, logout as apiLogout, getUserProfile, setAuthTokens } from '../utils/api';
 const AuthContext = createContext();
 
 export function useAuth() {
@@ -14,13 +14,6 @@ export function AuthProvider({ children }) {
 
     const checkAuthStatus = useCallback(async () => {
         setLoading(true);
-        const token = localStorage.getItem('token');
-        if (!token) {
-            setIsAuthenticated(false);
-            setUser(null);
-            setLoading(false);
-            return;
-        }
         try {
             const userProfile = await getUserProfile();
             setUser(userProfile);
@@ -29,7 +22,6 @@ export function AuthProvider({ children }) {
             console.error('Error checking auth status:', error);
             setIsAuthenticated(false);
             setUser(null);
-            localStorage.removeItem('token');
         } finally {
             setLoading(false);
         }
@@ -43,10 +35,7 @@ export function AuthProvider({ children }) {
     try {
         const response = await apiLogin(email, password);
         if (response.data && response.data.token) {
-            localStorage.setItem('token', response.data.token);
-            if (response.data.refreshToken) {
-                localStorage.setItem('refreshToken', response.data.refreshToken);
-            }
+            setAuthTokens(response.data.token, response.data.refreshToken);
             setIsAuthenticated(true);
             const userProfile = await getUserProfile();
             setUser(userProfile);
@@ -73,8 +62,6 @@ export function AuthProvider({ children }) {
 
     const handleLogout = () => {
         apiLogout();
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
         setUser(null);
         setIsAuthenticated(false);
     };

@@ -2,15 +2,25 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:9090/api';
 
-const TOKEN_KEY = 'token';
-const REFRESH_TOKEN_KEY = 'refreshToken';
+// Tokens are kept in memory only (never in localStorage/sessionStorage) so
+// injected scripts cannot read them from persistent browser storage.
+let accessToken = null;
+let storedRefreshToken = null;
 
-const getToken = () => localStorage.getItem(TOKEN_KEY);
-const setToken = (token) => localStorage.setItem(TOKEN_KEY, token);
-const removeToken = () => localStorage.removeItem(TOKEN_KEY);
+const getToken = () => accessToken;
+const setToken = (token) => { accessToken = token || null; };
+const removeToken = () => { accessToken = null; };
 
-const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY);
-const removeRefreshToken = () => localStorage.removeItem(REFRESH_TOKEN_KEY);
+const getRefreshToken = () => storedRefreshToken;
+const setRefreshToken = (token) => { storedRefreshToken = token || null; };
+const removeRefreshToken = () => { storedRefreshToken = null; };
+
+export const setAuthTokens = (token, refresh) => {
+    setToken(token);
+    if (refresh) {
+        setRefreshToken(refresh);
+    }
+};
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -22,7 +32,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
     config => {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
